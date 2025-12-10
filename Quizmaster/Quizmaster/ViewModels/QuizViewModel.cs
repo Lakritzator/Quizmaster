@@ -1,9 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Quizmaster.Models;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
 
 namespace Quizmaster.ViewModels;
 
@@ -27,7 +29,7 @@ public partial class QuizViewModel : ViewModelBase
     private string? _currentQuestionImageFileName;
 
     [ObservableProperty]
-    private List<AnswerViewModel> _currentAnswers = new();
+    private ObservableCollection<AnswerViewModel> _currentAnswers = new();
 
     [ObservableProperty]
     private int _questionNumber;
@@ -47,6 +49,19 @@ public partial class QuizViewModel : ViewModelBase
     [ObservableProperty]
     private bool _hasAnswered;
 
+    // New properties for tracking correct/incorrect answers and feedback
+    [ObservableProperty]
+    private int _correctAnswersCount;
+
+    [ObservableProperty]
+    private int _incorrectAnswersCount;
+
+    [ObservableProperty]
+    private string? _lastAnswerFeedback;
+
+    [ObservableProperty]
+    private bool _lastAnswerWasCorrect;
+
     public QuizViewModel(Quiz quiz, Action? onBackToMenu = null)
     {
         _quiz = quiz;
@@ -55,7 +70,8 @@ public partial class QuizViewModel : ViewModelBase
         _onBackToMenu = onBackToMenu;
         QuizTitle = quiz.Title;
         TotalQuestions = quiz.Questions.Count;
-        
+        CorrectAnswersCount = 0;
+        IncorrectAnswersCount = 0;
         LoadCurrentQuestion();
     }
 
@@ -72,13 +88,17 @@ public partial class QuizViewModel : ViewModelBase
         QuestionNumber = _currentQuestionIndex + 1;
         HasAnswered = false;
         CurrentExplanation = null;
+        LastAnswerFeedback = null;
+        LastAnswerWasCorrect = false;
 
-        CurrentAnswers = question.Answers.Select((answer, index) => new AnswerViewModel
-        {
-            Text = answer.TextHtml ?? answer.Text,
-            Index = index,
-            IsCorrect = answer.IsCorrect
-        }).ToList();
+        CurrentAnswers = new ObservableCollection<AnswerViewModel>(
+            question.Answers.Select((answer, index) => new AnswerViewModel
+            {
+                Text = answer.TextHtml ?? answer.Text,
+                Index = index,
+                IsCorrect = answer.IsCorrect
+            })
+        );
     }
 
     [RelayCommand]
@@ -89,7 +109,6 @@ public partial class QuizViewModel : ViewModelBase
         _userAnswers[_currentQuestionIndex] = answerIndex;
         HasAnswered = true;
 
-        // Show which answer was correct
         var question = _quiz.Questions[_currentQuestionIndex];
         var selectedAnswer = CurrentAnswers[answerIndex];
         selectedAnswer.IsSelected = true;
@@ -97,10 +116,25 @@ public partial class QuizViewModel : ViewModelBase
         foreach (var answer in CurrentAnswers)
         {
             answer.ShowCorrectness = true;
+            answer.ShowResult = true;
         }
 
         // Show explanation if available
         CurrentExplanation = question.ExplanationHtml ?? question.Explanation;
+
+        // Track correct/incorrect answers and provide feedback
+        if (selectedAnswer.IsCorrect)
+        {
+            CorrectAnswersCount++;
+            LastAnswerFeedback = "Correct!";
+            LastAnswerWasCorrect = true;
+        }
+        else
+        {
+            IncorrectAnswersCount++;
+            LastAnswerFeedback = "Incorrect!";
+            LastAnswerWasCorrect = false;
+        }
     }
 
     [RelayCommand]
@@ -130,7 +164,7 @@ public partial class QuizViewModel : ViewModelBase
     private void CompleteQuiz()
     {
         IsQuizComplete = true;
-        
+
         // Calculate score
         int correctAnswers = 0;
         for (int i = 0; i < _quiz.Questions.Count; i++)
@@ -144,7 +178,7 @@ public partial class QuizViewModel : ViewModelBase
                 }
             }
         }
-        
+
         Score = (int)((double)correctAnswers / _quiz.Questions.Count * 100);
     }
 
@@ -156,6 +190,10 @@ public partial class QuizViewModel : ViewModelBase
         _userAnswers.AddRange(Enumerable.Repeat(-1, _quiz.Questions.Count));
         IsQuizComplete = false;
         Score = 0;
+        CorrectAnswersCount = 0;
+        IncorrectAnswersCount = 0;
+        LastAnswerFeedback = null;
+        LastAnswerWasCorrect = false;
         LoadCurrentQuestion();
     }
 
@@ -171,6 +209,9 @@ public partial class QuizViewModel : ViewModelBase
 /// </summary>
 public partial class AnswerViewModel : ViewModelBase
 {
+    [ObservableProperty]
+    private bool _showResult;
+
     [ObservableProperty]
     private string _text = string.Empty;
 

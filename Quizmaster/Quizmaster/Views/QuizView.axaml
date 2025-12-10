@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Quizmaster.ViewModels"
+			 xmlns:converters="using:Quizmaster.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
              x:Class="Quizmaster.Views.QuizView"
              x:DataType="vm:QuizViewModel">
@@ -13,18 +14,24 @@
   <Grid RowDefinitions="Auto,*,Auto">
     <!-- Header -->
     <Border Grid.Row="0" Background="#F5F5F5" Padding="20,15">
-      <Grid ColumnDefinitions="Auto,*,Auto">
+      <Grid ColumnDefinitions="Auto,*,Auto,Auto">
         <Button Grid.Column="0" 
                 Content="← Back to Menu" 
                 Command="{Binding BackToMenuCommand}"
                 Padding="10,5"
                 Margin="0,0,20,0"/>
-        <TextBlock Grid.Column="1" Text="{Binding QuizTitle}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center"/>
-        <TextBlock Grid.Column="2" VerticalAlignment="Center">
+        <TextBlock Grid.Column="1" Text="{Binding QuizTitle}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource ThemeForegroundBrush}"/>
+        <TextBlock Grid.Column="2" VerticalAlignment="Center" Foreground="{DynamicResource ThemeForegroundBrush}">
           <Run Text="Question "/>
           <Run Text="{Binding QuestionNumber}"/>
           <Run Text=" of "/>
           <Run Text="{Binding TotalQuestions}"/>
+        </TextBlock>
+        <TextBlock Grid.Column="3" VerticalAlignment="Center" Foreground="{DynamicResource ThemeForegroundBrush}" Margin="20,0,0,0">
+            <Run Text="✔ "/>
+            <Run Text="{Binding CorrectAnswersCount}"/>
+            <Run Text="   ✖ "/>
+            <Run Text="{Binding IncorrectAnswersCount}"/>
         </TextBlock>
       </Grid>
     </Border>
@@ -33,7 +40,8 @@
     <ScrollViewer Grid.Row="1" IsVisible="{Binding !IsQuizComplete}">
       <StackPanel Margin="40,30" MaxWidth="700">
         <!-- Question Text -->
-        <TextBlock Text="{Binding CurrentQuestionText}" 
+        <TextBlock Text="{Binding CurrentQuestionText}"
+				   Foreground="{DynamicResource ThemeForegroundBrush}"
                    FontSize="18" 
                    TextWrapping="Wrap"
                    Margin="0,0,0,20"/>
@@ -45,14 +53,34 @@
         <ItemsControl ItemsSource="{Binding CurrentAnswers}" Margin="0,10,0,0">
           <ItemsControl.ItemTemplate>
             <DataTemplate DataType="vm:AnswerViewModel">
-              <Button Content="{Binding Text}"
-                      Command="{Binding $parent[ItemsControl].((vm:QuizViewModel)DataContext).SelectAnswerCommand}"
+              <Button Command="{Binding $parent[ItemsControl].((vm:QuizViewModel)DataContext).SelectAnswerCommand}"
                       CommandParameter="{Binding Index}"
                       HorizontalAlignment="Stretch"
                       HorizontalContentAlignment="Left"
                       Margin="0,0,0,10"
                       Padding="15,10"
                       FontSize="16">
+                <Button.Content>
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+					  <TextBlock FontSize="15" FontWeight="Bold" >
+						<TextBlock.Foreground>
+						  <MultiBinding Converter="{StaticResource AnswerResultToColorConverter}">
+						     <Binding Path="IsCorrect"/>
+						     <Binding Path="IsSelected"/>
+						     <Binding Path="ShowResult"/>
+						  </MultiBinding>
+						</TextBlock.Foreground>
+						<TextBlock.Text>
+						  <MultiBinding Converter="{StaticResource AnswerResultToIconConverter}">
+							<Binding Path="IsCorrect"/>
+							<Binding Path="IsSelected"/>
+							<Binding Path="ShowResult"/>
+						  </MultiBinding>
+						</TextBlock.Text>
+                    </TextBlock>
+                    <TextBlock Text="{Binding Text}" FontSize="16"/>
+                  </StackPanel>
+                </Button.Content>
                 <Button.Styles>
                   <Style Selector="Button">
                     <Setter Property="Background" Value="White"/>
@@ -83,8 +111,8 @@
             </MultiBinding>
           </Border.IsVisible>
           <StackPanel>
-            <TextBlock Text="Explanation:" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,10"/>
-            <TextBlock Text="{Binding CurrentExplanation}" TextWrapping="Wrap" FontSize="14"/>
+            <TextBlock Text="Explanation:" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,10" Foreground="{DynamicResource ThemeForegroundBrush}"/>
+            <TextBlock Text="{Binding CurrentExplanation}" TextWrapping="Wrap" FontSize="14" Foreground="{DynamicResource ThemeForegroundBrush}"/>
           </StackPanel>
         </Border>
       </StackPanel>
@@ -96,8 +124,8 @@
                 VerticalAlignment="Center"
                 HorizontalAlignment="Center"
                 Margin="40">
-      <TextBlock Text="Quiz Complete!" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20"/>
-      <TextBlock HorizontalAlignment="Center" FontSize="24" Margin="0,0,0,30">
+      <TextBlock Text="Quiz Complete!" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20" Foreground="{DynamicResource ThemeForegroundBrush}"/>
+      <TextBlock HorizontalAlignment="Center" FontSize="24" Margin="0,0,0,30" Foreground="{DynamicResource ThemeForegroundBrush}">
         <Run Text="Your Score: "/>
         <Run Text="{Binding Score}" FontWeight="Bold"/>
         <Run Text="%"/>
