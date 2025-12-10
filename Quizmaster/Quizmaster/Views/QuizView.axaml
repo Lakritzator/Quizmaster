@@ -13,9 +13,14 @@
   <Grid RowDefinitions="Auto,*,Auto">
     <!-- Header -->
     <Border Grid.Row="0" Background="#F5F5F5" Padding="20,15">
-      <Grid ColumnDefinitions="*,Auto">
-        <TextBlock Grid.Column="0" Text="{Binding QuizTitle}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center"/>
-        <TextBlock Grid.Column="1" VerticalAlignment="Center">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <Button Grid.Column="0" 
+                Content="← Back to Menu" 
+                Command="{Binding BackToMenuCommand}"
+                Padding="10,5"
+                Margin="0,0,20,0"/>
+        <TextBlock Grid.Column="1" Text="{Binding QuizTitle}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center"/>
+        <TextBlock Grid.Column="2" VerticalAlignment="Center">
           <Run Text="Question "/>
           <Run Text="{Binding QuestionNumber}"/>
           <Run Text=" of "/>
@@ -33,8 +38,8 @@
                    TextWrapping="Wrap"
                    Margin="0,0,0,20"/>
 
-        <!-- Question Image (if available) -->
-        <!-- TODO: Implement image display -->
+        <!-- Question Image support: Images can be included in quiz ZIP files and referenced via imageFileName property.
+             Display implementation is a future enhancement. -->
 
         <!-- Answers -->
         <ItemsControl ItemsSource="{Binding CurrentAnswers}" Margin="0,10,0,0">
@@ -97,12 +102,16 @@
         <Run Text="{Binding Score}" FontWeight="Bold"/>
         <Run Text="%"/>
       </TextBlock>
-      <Button Content="Restart Quiz" 
-              Command="{Binding RestartQuizCommand}"
-              HorizontalAlignment="Center"
-              Padding="30,10"
-              FontSize="16"
-              Margin="0,0,0,10"/>
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
+        <Button Content="Restart Quiz" 
+                Command="{Binding RestartQuizCommand}"
+                Padding="30,10"
+                FontSize="16"/>
+        <Button Content="Back to Menu" 
+                Command="{Binding BackToMenuCommand}"
+                Padding="30,10"
+                FontSize="16"/>
+      </StackPanel>
     </StackPanel>
 
     <!-- Navigation Buttons -->

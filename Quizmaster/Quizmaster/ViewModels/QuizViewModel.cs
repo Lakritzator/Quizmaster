@@ -15,6 +15,7 @@ public partial class QuizViewModel : ViewModelBase
     private readonly Quiz _quiz;
     private readonly List<int> _userAnswers;
     private int _currentQuestionIndex;
+    private readonly Action? _onBackToMenu;
 
     [ObservableProperty]
     private string _quizTitle = string.Empty;
@@ -46,11 +47,12 @@ public partial class QuizViewModel : ViewModelBase
     [ObservableProperty]
     private bool _hasAnswered;
 
-    public QuizViewModel(Quiz quiz)
+    public QuizViewModel(Quiz quiz, Action? onBackToMenu = null)
     {
         _quiz = quiz;
         _userAnswers = Enumerable.Repeat(-1, quiz.Questions.Count).ToList();
         _currentQuestionIndex = 0;
+        _onBackToMenu = onBackToMenu;
         QuizTitle = quiz.Title;
         TotalQuestions = quiz.Questions.Count;
         
@@ -155,6 +157,12 @@ public partial class QuizViewModel : ViewModelBase
         IsQuizComplete = false;
         Score = 0;
         LoadCurrentQuestion();
+    }
+
+    [RelayCommand]
+    private void BackToMenu()
+    {
+        _onBackToMenu?.Invoke();
     }
 }
 

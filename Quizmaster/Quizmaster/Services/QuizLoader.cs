@@ -68,12 +68,11 @@ public class QuizLoader
 
         try
         {
-            var archive = ZipFile.OpenRead(zipFilePath);
+            using var archive = ZipFile.OpenRead(zipFilePath);
             var imageEntry = archive.GetEntry(imageFileName);
             
             if (imageEntry == null)
             {
-                archive.Dispose();
                 return null;
             }
 
@@ -84,8 +83,6 @@ public class QuizLoader
             }
             
             memoryStream.Position = 0;
-            archive.Dispose();
-            
             return memoryStream;
         }
         catch

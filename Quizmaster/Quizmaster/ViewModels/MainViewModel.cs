@@ -36,8 +36,19 @@ public partial class MainViewModel : ViewModelBase
 
         if (!Directory.Exists(quizzesDirectory))
         {
-            // Try looking in the project directory for development
-            quizzesDirectory = Path.Combine(appDirectory, "..", "..", "..", "..", "..", "Quizzes");
+            // Try looking in the project directory for development (walk up the directory tree)
+            var currentDir = new DirectoryInfo(appDirectory);
+            while (currentDir != null && currentDir.Parent != null)
+            {
+                var testPath = Path.Combine(currentDir.Parent.FullName, "Quizzes");
+                if (Directory.Exists(testPath))
+                {
+                    quizzesDirectory = testPath;
+                    break;
+                }
+                currentDir = currentDir.Parent;
+            }
+            
             if (!Directory.Exists(quizzesDirectory))
             {
                 return;
@@ -66,7 +77,7 @@ public partial class MainViewModel : ViewModelBase
             var quiz = await QuizLoader.LoadQuizFromZipAsync(SelectedQuiz.FilePath);
             if (quiz != null)
             {
-                CurrentView = new QuizViewModel(quiz);
+                CurrentView = new QuizViewModel(quiz, BackToMenu);
             }
         }
         catch (Exception ex)
