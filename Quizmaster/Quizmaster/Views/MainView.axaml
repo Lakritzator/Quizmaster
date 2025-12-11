@@ -1,0 +1,60 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Quizmaster.ViewModels"
+             xmlns:views="using:Quizmaster.Views"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="Quizmaster.Views.MainView"
+             x:DataType="vm:MainViewModel">
+  <Design.DataContext>
+    <vm:MainViewModel />
+  </Design.DataContext>
+
+  <Grid>
+    <!-- Quiz Selection Screen -->
+    <Panel IsVisible="{Binding CurrentView, Converter={x:Static ObjectConverters.IsNull}}">
+      <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="600" Margin="20">
+        <TextBlock Text="Quizmaster" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+        <TextBlock Text="ArchiMate Certification Quiz Application" FontSize="18" HorizontalAlignment="Center" Margin="0,0,0,40"/>
+        
+        <TextBlock Text="Select a Quiz:" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+        
+        <ListBox ItemsSource="{Binding AvailableQuizzes}" 
+                 SelectedItem="{Binding SelectedQuiz}"
+                 MinHeight="200"
+                 Margin="0,0,0,20">
+          <ListBox.ItemTemplate>
+            <DataTemplate DataType="vm:QuizFileInfo">
+              <TextBlock Text="{Binding Name}" FontSize="14" Padding="10,5"/>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+        
+        <Button Content="Start Quiz" 
+                Command="{Binding StartQuizCommand}"
+                IsEnabled="{Binding SelectedQuiz, Converter={x:Static ObjectConverters.IsNotNull}}"
+                HorizontalAlignment="Center"
+                Padding="40,10"
+                FontSize="16"/>
+        
+        <TextBlock Text="No quizzes available. Please add .zip quiz files to the Quizzes directory."
+                   IsVisible="{Binding !AvailableQuizzes.Count}"
+                   HorizontalAlignment="Center"
+                   Margin="0,20,0,0"
+                   Foreground="Gray"/>
+      </StackPanel>
+    </Panel>
+
+    <!-- Quiz View -->
+    <Panel IsVisible="{Binding CurrentView, Converter={x:Static ObjectConverters.IsNotNull}}">
+      <ContentControl Content="{Binding CurrentView}">
+        <ContentControl.DataTemplates>
+          <DataTemplate DataType="vm:QuizViewModel">
+            <views:QuizView />
+          </DataTemplate>
+        </ContentControl.DataTemplates>
+      </ContentControl>
+    </Panel>
+  </Grid>
+</UserControl>

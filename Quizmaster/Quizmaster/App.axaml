@@ -1,0 +1,21 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="using:Quizmaster"
+             xmlns:converters="using:Quizmaster.Converters"
+             x:Class="Quizmaster.App"
+             RequestedThemeVariant="Light">
+			 <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->            
+
+    <Application.DataTemplates>
+        <local:ViewLocator/>
+    </Application.DataTemplates>
+
+	<Application.Styles>
+		<SimpleTheme />
+	</Application.Styles>
+
+    <Application.Resources>
+      <converters:AnswerResultToIconConverter x:Key="AnswerResultToIconConverter"/>
+      <converters:AnswerResultToColorConverter x:Key="AnswerResultToColorConverter"/>
+    </Application.Resources>
+</Application>
